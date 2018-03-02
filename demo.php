@@ -3,8 +3,7 @@
  * @Author:      admin@acgsan.com
  * @DateTime:    2018-03-02 14:21:50
  * @Description: p站日榜前1-50下载
- * @param:      id：日期
- 				n： 排行数 
+ * @param:      id：日期 n： 排行数 
 
  http://air.demo/demo.php?id=20180225&n=20
 */
