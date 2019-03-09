@@ -4,7 +4,7 @@
  * @DateTime:    2018-03-02 14:21:50
  * @Description: p站日榜前1-50下载
  * @param:      id：日期 n： 排行数 
- http://air.demo/spider/pix.php?id=20180225&n=20
+ http://air.me/spider/pix.php?id=20180225&n=20
 */
 /* end */
 set_time_limit(120);
@@ -13,8 +13,15 @@ define('SITE_PATH', dirname(__FILE__));
 $id = $_GET['id'];
 $num = $_GET['n'];
 $url = "https://www.pixiv.net/ranking.php?mode=daily&date=" . $id;
-$optionget = array('http' => array('method' => "GET", 'header' => "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"));
-$file = file_get_contents($url, false, stream_context_create($optionget));
+$arrContextOptions=array(
+    "ssl"=>array(
+        "verify_peer"=>false,
+        "verify_peer_name"=>false,
+    ),
+);  
+
+$file = file_get_contents($url, false, stream_context_create($arrContextOptions));
+
 $regex = "/https\\:\\/\\/i.pximg.net\\/c\\/240x480\\/img-master\\/img\\/.*?_master1200\\.jpg/ism";
 preg_match_all($regex, $file, $match);
 
@@ -28,10 +35,9 @@ foreach ($match[0] as $k => $v) {
         unset($match[0][$k]);
     }
 }
-// echo '<pre>';var_dump($match[0]);exit;
+
 foreach ($match[0] as $k => $v) {
-    echo '<pre>';var_dump($k,$v);
-    $adds = $work_path . '/' . $k.'.jpg';
+    $adds = $work_path . '/' . $id . $k.'.jpg';
     download($adds,$v);
 }
 function download($adds,$url)
