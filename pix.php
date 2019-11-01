@@ -21,23 +21,40 @@ $arrContextOptions=array(
 );  
 
 $file = file_get_contents($url, false, stream_context_create($arrContextOptions));
+$regex = "/data-title.*?data-user-name/ism";
+preg_match_all($regex, $file, $match);
 
 $regex = "/https\\:\\/\\/i.pximg.net\\/c\\/240x480\\/img-master\\/img\\/.*?_master1200\\.jpg/ism";
-preg_match_all($regex, $file, $match);
+preg_match_all($regex, $file, $match_image);
+
 
 $work_path = SITE_PATH . "/${id}";
 dir_mkdir($work_path);
 
 foreach ($match[0] as $k => $v) {
-    $match[0][$k] = str_ireplace('c/240x480/img-master', 'img-master', $match[0][$k]);
-    // $match[0][$k] = str_ireplace('_master1200', '', $match[0][$k]);
+	$match[0][$k] = str_replace("data-title=\"","",$match[0][$k]);
+	$match[0][$k] = str_replace("\" data-user-name","",$match[0][$k]);
+    $match[0][$k] = json_encode($match[0][$k]);
+    $sp  =  '/uff[0-9][0-9]/ism' ;
+    $match[0][$k]  = preg_replace( $sp ,  '' ,  $match[0][$k] );
+    $match[0][$k] = json_decode($match[0][$k]);
+
+    $match[0][$k] = removeEmoji($match[0][$k]);
+    $match[0][$k] = replace_specialChar($match[0][$k]);
     if ($k >= $num) {
         unset($match[0][$k]);
     }
 }
 
-foreach ($match[0] as $k => $v) {
-    $adds = $work_path . '/' . $id . $k.'.jpg';
+foreach ($match_image[0] as $k => $v) {
+    $match_image[0][$k] = str_ireplace('c/240x480/img-master', 'img-master', $match_image[0][$k]);
+    if ($k >= $num) {
+        unset($match_image[0][$k]);
+    }
+}
+
+foreach ($match_image[0] as $k => $v) {
+    $adds = $work_path . '/(' .$k.')'. $match[0][$k].'.jpg';
     download($adds,$v);
 }
 function download($adds,$url)
@@ -76,4 +93,33 @@ function dir_mkdir($path = '', $mode = 0777, $recursive = true)
     }
  
     return true;
+}
+//去除表情
+function  removeEmoji($text) {
+         $text = preg_replace("/<a.*?_blank\">/ism", '', $text);
+         $text = preg_replace("/\<\/a\>/ism", '', $text);
+         $text = str_replace(array(" ","　","\t","\n","\r"),array("","","","",""), $text); 
+
+         $clean_text  =  "" ;
+         // Match Emoticons
+         $regexEmoticons  =  '/[\x{1F600}-\x{1F64F}]/u' ;
+         $clean_text  = preg_replace( $regexEmoticons ,  '' ,  $text );
+         // Match Miscellaneous Symbols and Pictographs
+         $regexSymbols  =  '/[\x{1F300}-\x{1F5FF}]/u' ;
+         $clean_text  = preg_replace( $regexSymbols ,  '' ,  $clean_text );
+         // Match Transport And Map Symbols
+         $regexTransport  =  '/[\x{1F680}-\x{1F6FF}]/u' ;
+         $clean_text  = preg_replace( $regexTransport ,  '' ,  $clean_text );
+         // Match Miscellaneous Symbols
+         $regexMisc  =  '/[\x{2600}-\x{26FF}]/u' ;
+         $clean_text  = preg_replace( $regexMisc ,  '' ,  $clean_text );
+         // Match Dingbats
+         $regexDingbats  =  '/[\x{2700}-\x{27BF}]/u' ;
+         $clean_text  = preg_replace( $regexDingbats ,  '' ,  $clean_text );
+         return $clean_text;
+     }
+function replace_specialChar($strParam){
+   $regex = "/\/|\～|\，|\。|\！|\？|\“|\”|\【|\】|\『|\』|\：|\；|\《|\》|\’|\‘|\ |\·|\~|\!|\@|\#|\\$|\%|\^|\&|\*|\(|\)|\_|\+|\{|\}|\:|\<|\>|\?|\[|\]|\,|\.|\/|\;|\'|\`|\-|\=|\\\|\|/";
+   $a = preg_replace($regex,"",$strParam);
+   return $a;
 }
