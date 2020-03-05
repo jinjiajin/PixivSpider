@@ -3,8 +3,8 @@
  * @Author:      admin@acgsan.com
  * @DateTime:    2018-03-02 14:21:50
  * @Description: p站日榜前1-50下载
- * @param:      id：日期 n： 排行数 
- http://air.me/spider/pix.php?id=20180225&n=20
+ * @param:      id：日期  n：排行数 
+ http://air.me/pix/index.php?id=20180225&n=20
 */
 /* end */
 set_time_limit(120);
@@ -13,6 +13,7 @@ define('SITE_PATH', dirname(__FILE__));
 $id = $_GET['id'];
 $num = $_GET['n'];
 $url = "https://www.pixiv.net/ranking.php?mode=daily&date=" . $id;
+
 $arrContextOptions=array(
     "ssl"=>array(
         "verify_peer"=>false,
@@ -21,14 +22,16 @@ $arrContextOptions=array(
 );  
 
 $file = file_get_contents($url, false, stream_context_create($arrContextOptions));
+
 $regex = "/data-title.*?data-user-name/ism";
 preg_match_all($regex, $file, $match);
 
-$regex = "/https\\:\\/\\/i.pximg.net\\/c\\/240x480\\/img-master\\/img\\/.*?_master1200\\.jpg/ism";
+$regex = "/https\:\/\/[a-z,0-9,-]+\.[a-z,-]+\.[a-z]+\/c\/240x480\/img-master\/img.*?_p0_master1200.jpg/ism";
+
 preg_match_all($regex, $file, $match_image);
 
-
 $work_path = SITE_PATH . "/${id}";
+
 dir_mkdir($work_path);
 
 foreach ($match[0] as $k => $v) {
@@ -50,13 +53,12 @@ foreach ($match_image[0] as $k => $v) {
     $match_image[0][$k] = str_ireplace('c/240x480/img-master', 'img-master', $match_image[0][$k]);
     if ($k >= $num) {
         unset($match_image[0][$k]);
+    }else {
+        $adds = $work_path . '/(' .$k.')'. $match[0][$k].'.jpg';
+        download($adds,$v);
     }
 }
 
-foreach ($match_image[0] as $k => $v) {
-    $adds = $work_path . '/(' .$k.')'. $match[0][$k].'.jpg';
-    download($adds,$v);
-}
 function download($adds,$url)
 {
     $ch = curl_init();
