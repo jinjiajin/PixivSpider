@@ -55,7 +55,7 @@ foreach ($match_image[0] as $k => $v) {
         unset($match_image[0][$k]);
     }else {
         $adds = $work_path . '/(' .$k.')'. $match[0][$k].'.jpg';
-        download($adds,$v);
+        download($adds,$match_image[0][$k]);
     }
 }
 
