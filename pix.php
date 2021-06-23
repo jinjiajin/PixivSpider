@@ -1,6 +1,6 @@
 <?php
 /*
- * @Author:      admin@acgsan.com
+ * @Author:      i@jinjiajin.net
  * @DateTime:    2018-03-02 14:21:50
  * @Description: p站日榜前1-50下载
  * @param:      id：日期  n：排行数 
